@@ -14,6 +14,96 @@ This is a **RESTful API** for a Tour Booking application, allowing users to brow
 For a complete list of available endpoints and request examples, visit the **Postman API Documentation:**  
 👉 [API Documentation](https://documenter.getpostman.com/view/37294382/2sAYkKHHhd)
 
+## User Authenticatio Flow
+
+``` mermaid  
+%%{init: {'theme': 'neutral', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#000000', 'primaryTextColor': '#000000', 'noteTextColor': '#000000', 'actorTextColor': '#000000', 'signalTextColor': '#000000', 'lineColor': '#000000', 'altBackground': '#fef3c7', 'altTextColor': '#000000', 'noteBkgColor': '#ffedd5', 'activationBkgColor': '#e5e7eb', 'sequenceNumberColor': '#000000'}}}%%
+sequenceDiagram
+    actor U as User (Client)
+    participant API as Express App
+    participant Auth as authController
+    participant DB as MongoDB (User collection)
+    participant Mail as Email Service (Nodemailer)
+
+    rect rgba(255, 255, 204, 1)
+    Note over U,DB: 1. SIGNUP
+    U->>API: POST /api/v1/users/signup {name,email,password,passwordConfirm}
+    API->>Auth: signup(req,res,next)
+    Auth->>DB: User.create({...})
+    DB-->>DB: pre('save') hook: bcrypt.hash(password)
+    DB-->>Auth: new user document
+    Auth->>Auth: generateToken(user._id) via jwt.sign
+    Auth-->>U: 201 + Set-Cookie: jwt + {token, user}
+    end
+
+    rect rgba(221, 238, 255, 1)
+    Note over U,DB: 2. LOGIN
+    U->>API: POST /api/v1/users/login {email,password}
+    API->>Auth: login(req,res,next)
+    Auth->>DB: User.findOne({email}).select('+password')
+    DB-->>Auth: user (with hashed password)
+    Auth->>Auth: user.correctPassword(candidate, hash) [bcrypt.compare]
+    alt password invalid or user not found
+        Auth-->>U: 401 Incorrect email or password
+    else password valid
+        Auth->>Auth: generateToken(user._id)
+        Auth-->>U: 200 + Set-Cookie: jwt + {token, user}
+    end
+    end
+
+    rect rgba(204, 255, 229, 1)
+    Note over U,DB: 3. ACCESS PROTECTED ROUTE (e.g. PATCH /users/update-me)
+    U->>API: Request with Authorization: Bearer <token>
+    API->>Auth: protect(req,res,next)
+    Auth->>Auth: jwt.verify(token, JWT_SECRET) [promisified]
+    alt token missing / invalid / expired
+        Auth-->>U: 401 Please login to get access
+    else token valid
+        Auth->>DB: User.findById(decoded.id)
+        DB-->>Auth: currentUser
+        alt user deleted since token issued
+            Auth-->>U: 401 User no longer exists
+        else user still exists
+            Auth->>Auth: currentUser.changePasswordAfter(decoded.iat)
+            alt password changed after token issued
+                Auth-->>U: 401 Please login again
+            else token still valid
+                Auth->>Auth: req.user = currentUser
+                Auth->>API: next() → restrictTo(roles) if required
+                API-->>U: 200 + requested resource
+            end
+        end
+    end
+    end
+
+    rect rgba(255, 204, 204, 1)
+    Note over U,Mail: 4. FORGOT / RESET PASSWORD
+    U->>API: POST /users/forgot-password {email}
+    API->>Auth: forgotPassword(req,res,next)
+    Auth->>DB: User.findOne({email})
+    DB-->>Auth: user
+    Auth->>Auth: createPasswordResetToken() [crypto random + sha256 hash]
+    Auth->>DB: user.save({validateBeforeSave:false})
+    Auth->>Mail: sendEmail({resetURL})
+    Mail-->>U: Email with reset link (token valid 10 min)
+    Auth-->>U: 200 Token sent to email
+
+    U->>API: PATCH /users/reset-password/:token {password, passwordConfirm}
+    API->>Auth: resetPassword(req,res,next)
+    Auth->>DB: User.findOne({passwordResetToken: hash(token), passwordResetExpires: {$gt: now}})
+    alt token invalid or expired
+        DB-->>Auth: null
+        Auth-->>U: 400 Token is invalid or expired
+    else token valid
+        DB-->>Auth: user
+        Auth->>DB: set new password, clear reset fields, save()
+        Auth->>Auth: generateToken(user._id)
+        Auth-->>U: 200 + Set-Cookie: jwt (auto login)
+    end
+    end
+
+```
+
 ## Installation
 
 ### **1. Clone the repository**
