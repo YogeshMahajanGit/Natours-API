@@ -15,6 +15,8 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     require: [true, "Booking must have a price."],
   },
+  razorpayOrderId: String,
+  razorpayPaymentId: String,
   createdAt: {
     type: Date,
     default: Date.now(),
