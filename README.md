@@ -3,6 +3,7 @@
 This is a **RESTful API** for a Tour Booking application, allowing users to browse tours, book trips, leave reviews, and manage their accounts. The API is built using **Node.js** and **Express**, with MongoDB as the database.
 
 ## Features
+
 - **User Authentication** (Sign up, Login, Forgot Password, etc.)
 - **Tour Management** (List, Filter, and Get Tour Details)
 - **Booking System** (Book and Manage Reservations)
@@ -11,12 +12,13 @@ This is a **RESTful API** for a Tour Booking application, allowing users to brow
 - **Email Notifications:** Automated emails for booking confirmation and password resets.
 
 ## API Documentation
+
 For a complete list of available endpoints and request examples, visit the **Postman API Documentation:**  
 👉 [API Documentation](https://documenter.getpostman.com/view/37294382/2sAYkKHHhd)
 
 ## User Authenticatio Flow
 
-``` mermaid  
+```mermaid
 %%{init: {'theme': 'neutral', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#000000', 'primaryTextColor': '#000000', 'noteTextColor': '#000000', 'actorTextColor': '#000000', 'signalTextColor': '#000000', 'lineColor': '#000000', 'altBackground': '#fef3c7', 'altTextColor': '#000000', 'noteBkgColor': '#ffedd5', 'activationBkgColor': '#e5e7eb', 'sequenceNumberColor': '#000000'}}}%%
 sequenceDiagram
     actor U as User (Client)
@@ -107,18 +109,22 @@ sequenceDiagram
 ## Installation
 
 ### **1. Clone the repository**
+
 ```sh
 git clone https://github.com/YOUR_GITHUB_USERNAME/tour-booking-api.git
 cd tour-booking-api
 ```
 
 ### **2. Install dependencies**
+
 ```sh
 npm install
 ```
 
 ### **3. Configure environment variables**
+
 Create a `.env` file in the project root and add the following:
+
 ```env
 NODE_ENV=development or production
 PORT=5000
@@ -130,21 +136,29 @@ EMAIL_USERNAME=your_email_username
 EMAIL_PASSWORD=your_email_password
 EMAIL_HOST=your_email_host
 EMAIL_PORT=your_email_port
+
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 ```
 
 ### **4. Start the server**
+
 ```sh
 npm start
 ```
+
 For development mode with live reload:
+
 ```sh
 npm run dev
 ```
 
 ## Deployment
+
 To deploy the API, set up the `.env` variables and use a hosting service like **Vercel, Render, or AWS**.
 
 ## Technologies Used
+
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
@@ -154,10 +168,10 @@ To deploy the API, set up the `.env` variables and use a hosting service like **
 - **JWT & Bcrypt** (Authentication & Security)
 - **Nodemailer** (Email Services)
 
-
 ## Currently Working On Frontend 🚀
 
 A **React.js** frontend is being developed to provide a user-friendly interface for the API. The frontend will feature:
+
 - A modern UI with **React components**.
 - **Tours Page** with filtering options.
 - **Single Tour Page** with details, images, guides, reviews, and an interactive map.
@@ -166,7 +180,9 @@ A **React.js** frontend is being developed to provide a user-friendly interface 
 - **Admin Dashboard** (future scope).
 
 ## Contact
+
 For any inquiries, reach out via email: **mahajanyogesh443@gmail.com**
 
 ---
+
 🚀 **Happy Coding!** If you like this project, don't forget to ⭐ the repo!
