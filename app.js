@@ -10,6 +10,7 @@ const AppError = require("./utils/appError.js");
 const globelErrorHandler = require("./utils/errors.js");
 const tourRouter = require("./routes/tourRouter.js");
 const userRouter = require("./routes/userRouter.js");
+const bookingRouter = require("./routes/bookingRouter.js");
 const reviewRouter = require("./routes/reviewRouter.js");
 
 const app = express();
@@ -49,7 +50,7 @@ app.use(
       "difficulty",
       "price",
     ],
-  })
+  }),
 );
 
 // Serving static file
@@ -59,6 +60,7 @@ app.use(express.static(`${__dirname}/public`));
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/reviews", reviewRouter);
+app.use("/api/v1/booking", bookingRouter);
 
 // Handle not fount (404) requests
 app.all("*", (req, res, next) => {
