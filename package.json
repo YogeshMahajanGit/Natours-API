@@ -6,7 +6,9 @@
   "scripts": {
     "start": "nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:watch": "jest --watch"
   },
   "author": "Yogesh Mahajan",
   "license": "ISC",
@@ -29,6 +31,8 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-    "ndb": "^1.1.5"
+    "jest": "^30.4.2",
+    "ndb": "^1.1.5",
+    "supertest": "^7.2.2"
   }
 }
