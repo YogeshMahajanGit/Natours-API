@@ -13,17 +13,21 @@ const bookingSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    require: [true, "Booking must have a price."],
+    required: [true, "Booking must have a price."],
+  },
+  razorpayPaymentId: {
+    type: String,
+    unique: true,
+    sparse: true,
   },
   razorpayOrderId: String,
-  razorpayPaymentId: String,
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   paid: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 });
 

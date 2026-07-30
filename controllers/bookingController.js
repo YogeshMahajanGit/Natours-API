@@ -54,22 +54,49 @@ exports.verifyPaymentAndBook = catchAsync(async (req, res, next) => {
     return next(new AppError("Payment verification failed", 400));
   }
 
+  // Idempotency check — has this payment already been booked.
+  const existingBooking = await Booking.findOne({
+    razorpayPaymentId: razorpay_payment_id,
+  });
+
+  if (existingBooking) {
+    return res.status(200).json({
+      status: "success",
+      message: "Booking already exists for this payment",
+      data: { booking: existingBooking },
+    });
+  }
+
   const tour = await Tour.findById(tourId);
   if (!tour) return next(new AppError("No tour found with that ID", 404));
 
-  const booking = await Booking.create({
-    tour: tour.id,
-    user: req.user.id,
-    price: tour.price,
-    razorpayOrderId: razorpay_order_id,
-    razorpayPaymentId: razorpay_payment_id,
-    paid: true,
-  });
+  try {
+    const booking = await Booking.create({
+      tour: tour.id,
+      user: req.user.id,
+      price: tour.price,
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      paid: true,
+    });
 
-  res.status(201).json({
-    status: "success",
-    data: { booking },
-  });
+    return res.status(201).json({
+      status: "success",
+      data: { booking },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      const existing = await Booking.findOne({
+        razorpayPaymentId: razorpay_payment_id,
+      });
+      return res.status(200).json({
+        status: "success",
+        message: "Booking already exists for this payment",
+        data: { booking: existing },
+      });
+    }
+    return next(err);
+  }
 });
 
 exports.getBooking = factory.getOne(Booking);
