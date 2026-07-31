@@ -5,6 +5,8 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
 
 const AppError = require("./utils/appError.js");
 const globelErrorHandler = require("./utils/errors.js");
@@ -55,6 +57,9 @@ app.use(
 
 // Serving static file
 app.use(express.static(`${__dirname}/public`));
+
+// Swagger doc
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
 app.use("/api/v1/tours", tourRouter);
