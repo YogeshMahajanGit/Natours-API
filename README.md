@@ -16,7 +16,7 @@ This is a **RESTful API** for a Tour Booking application, allowing users to brow
 For a complete list of available endpoints and request examples, visit the **Postman API Documentation:**  
 👉 [API Documentation](https://documenter.getpostman.com/view/37294382/2sAYkKHHhd)
 
-## User Authenticatio Flow
+## User Authentication Flow
 
 ```mermaid
 %%{init: {'theme': 'neutral', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#000000', 'primaryTextColor': '#000000', 'noteTextColor': '#000000', 'actorTextColor': '#000000', 'signalTextColor': '#000000', 'lineColor': '#000000', 'altBackground': '#fef3c7', 'altTextColor': '#000000', 'noteBkgColor': '#ffedd5', 'activationBkgColor': '#e5e7eb', 'sequenceNumberColor': '#000000'}}}%%
@@ -106,13 +106,142 @@ sequenceDiagram
 
 ```
 
+## Application Flow Diagram
+
+```mermaid
+    ---
+config:
+  theme: base
+  themeVariables:
+    background: "#ffffff"
+    primaryTextColor: "#000000"
+    lineColor: "#000000"
+    textColor: "#000000"
+    clusterBkg: "#ffffff"
+    clusterBorder: "#000000"
+---
+flowchart TB
+    Client["Client Apps<br/>(Postman / React Frontend / Mobile)"]
+    Razorpay["Razorpay<br/>(Payment Gateway)"]
+
+    subgraph Server["Node.js + Express Server (server.js / app.js)"]
+        direction TB
+
+        subgraph MW["Global Middleware Pipeline"]
+            direction TB
+            Helmet["helmet<br/>(secure HTTP headers)"]
+            RateLimit["express-rate-limit<br/>(100 req/hr per IP on /api)"]
+            WebhookRoute["POST /api/v1/webhook-razorpay<br/>(express.raw, registered BEFORE<br/>json parser for signature check)"]
+            BodyParser["express.json<br/>(body parsing, 10kb limit)"]
+            Sanitize["express-mongo-sanitize + xss-clean<br/>(NoSQL injection / XSS defense)"]
+            HPP["hpp<br/>(param pollution guard)"]
+            Static["express.static<br/>(serves /public)"]
+            Helmet --> RateLimit --> WebhookRoute --> BodyParser --> Sanitize --> HPP --> Static
+        end
+
+        subgraph Routers["Routers (/api/v1/*)"]
+            direction TB
+            TourRouter["tourRouter"]
+            UserRouter["userRouter"]
+            ReviewRouter["reviewRouter"]
+            BookingRouter["bookingRouter<br/>(checkout-session, verify-payment,<br/>my-bookings, admin CRUD)"]
+            TourRouter -. "nested: /:tourId/reviews" .-> ReviewRouter
+        end
+
+        subgraph Auth["Auth Middleware (authController)"]
+            direction TB
+            Protect["protect<br/>(verify JWT, attach req.user)"]
+            Restrict["restrictTo(...roles)<br/>(role-based access control)"]
+            Protect --> Restrict
+        end
+
+        subgraph Controllers["Controllers"]
+            direction TB
+            TourCtrl["tourController<br/>(aliasTopTours, geo queries,<br/>aggregations)"]
+            UserCtrl["userController<br/>(getMe, updateMe, deleteMe)"]
+            ReviewCtrl["reviewController<br/>(setTourUserIds)"]
+            AuthCtrl["authController<br/>(signup, login, forgot/reset<br/>password, updatePassword)"]
+            BookingCtrl["bookingController<br/>(checkoutSession, verifyPaymentAndBook,<br/>razorpayWebhook, getMyBookings)"]
+            Factory["handleFactory<br/>(generic createOne/getAll/<br/>getOne/updateOne/deleteOne)"]
+
+            TourCtrl -. uses .-> Factory
+            UserCtrl -. uses .-> Factory
+            ReviewCtrl -. uses .-> Factory
+            BookingCtrl -. uses .-> Factory
+        end
+
+        subgraph Utils["Cross-cutting Utils"]
+            direction TB
+            APIFeatures["APIFeatures<br/>(filter/sort/limit/paginate)"]
+            AppError["AppError"]
+            CatchAsync["catchAsync<br/>(async error wrapper)"]
+            ErrorHandler["globalErrorHandler<br/>(errors.js)"]
+            Email["email.js<br/>(nodemailer)"]
+            SignatureUtil["verifyRazorpaySignature<br/>(HMAC SHA256 check)"]
+        end
+
+        subgraph Models["Mongoose Models"]
+            direction TB
+            TourModel["Tour<br/>(geo index, slug,<br/>virtual populate: reviews)"]
+            UserModel["User<br/>(bcrypt hash, password reset<br/>token, active flag)"]
+            ReviewModel["Review<br/>(unique tour+user index,<br/>post-save avgRating calc)"]
+            BookingModel["Booking<br/>(unique+sparse razorpayPaymentId,<br/>paid flag, tour+user refs)"]
+        end
+    end
+
+    DB[("MongoDB Atlas<br/>(Tours / Users / Reviews / Bookings)")]
+    SMTP["Email Service<br/>(SMTP via nodemailer)"]
+
+    Client -->|HTTPS request| MW
+    MW --> Routers
+    Routers -->|protected routes| Auth
+    Routers -->|public routes| Controllers
+    Auth --> Controllers
+    Controllers --> Utils
+    Controllers --> Models
+    Models -->|Mongoose ODM| DB
+    AuthCtrl -->|password reset /<br/>welcome email| Email
+    Email --> SMTP
+    Controllers -. errors .-> ErrorHandler
+    ErrorHandler -->|JSON error response| Client
+    Controllers -->|JSON success response| Client
+    BookingCtrl -->|create order / verify signature| Razorpay
+    BookingCtrl -. uses .-> SignatureUtil
+    Razorpay -.->|signed webhook payload,<br/>bypasses Client + Auth| WebhookRoute
+    WebhookRoute -->|payment.captured event| BookingCtrl
+
+    classDef default fill:#ffffff,stroke:#000000,color:#000000,stroke-width:2px;
+    classDef external fill:#e6f0ff,stroke:#003b8f,color:#000000,stroke-width:3px;
+    classDef db fill:#fff4cc,stroke:#7a4f00,color:#000000,stroke-width:3px;
+    classDef payment fill:#ffe0e0,stroke:#990000,color:#000000,stroke-width:3px;
+    classDef server fill:#f2f2f2,stroke:#000000,color:#000000,stroke-width:2px;
+    classDef middleware fill:#e6f7f5,stroke:#005a55,color:#000000,stroke-width:2px;
+    classDef auth fill:#eee8ff,stroke:#3b1f7a,color:#000000,stroke-width:2px;
+    classDef controller fill:#e8f1ff,stroke:#003b8f,color:#000000,stroke-width:2px;
+    classDef utility fill:#fff0d9,stroke:#7a3e00,color:#000000,stroke-width:2px;
+    classDef model fill:#e8f7e8,stroke:#145214,color:#000000,stroke-width:2px;
+
+    class Client,SMTP external;
+    class DB db;
+    class Razorpay payment;
+    class Server server;
+    class Helmet,RateLimit,WebhookRoute,BodyParser,Sanitize,HPP,Static middleware;
+    class Protect,Restrict auth;
+    class TourCtrl,UserCtrl,ReviewCtrl,AuthCtrl,BookingCtrl,Factory controller;
+    class APIFeatures,AppError,CatchAsync,ErrorHandler,Email,SignatureUtil utility;
+    class TourModel,UserModel,ReviewModel,BookingModel model;
+
+    linkStyle default stroke:#000000,stroke-width:2px;
+
+```
+
 ## Installation
 
 ### **1. Clone the repository**
 
 ```sh
-git clone https://github.com/YOUR_GITHUB_USERNAME/tour-booking-api.git
-cd tour-booking-api
+git clone https://github.com/YogeshMahajanGit/Natours-API.git
+cd Natours-API
 ```
 
 ### **2. Install dependencies**
@@ -167,17 +296,6 @@ To deploy the API, set up the `.env` variables and use a hosting service like **
 - **MongoDB & Mongoose** (Database & ORM)
 - **JWT & Bcrypt** (Authentication & Security)
 - **Nodemailer** (Email Services)
-
-## Currently Working On Frontend 🚀
-
-A **React.js** frontend is being developed to provide a user-friendly interface for the API. The frontend will feature:
-
-- A modern UI with **React components**.
-- **Tours Page** with filtering options.
-- **Single Tour Page** with details, images, guides, reviews, and an interactive map.
-- **User Authentication** including signup, login, and profile management.
-- **Booking System** integrated with the backend.
-- **Admin Dashboard** (future scope).
 
 ## Contact
 
