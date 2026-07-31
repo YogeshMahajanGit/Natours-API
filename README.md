@@ -282,6 +282,14 @@ For development mode with live reload:
 npm run dev
 ```
 
+## **5. Running Tests**
+
+```sh
+npm test
+```
+
+Tests use `mongodb-memory-server` for an isolated in-memory database and Supertest for HTTP integration testing.
+
 ## Deployment
 
 To deploy the API, set up the `.env` variables and use a hosting service like **Vercel, Render, or AWS**.
@@ -296,6 +304,7 @@ To deploy the API, set up the `.env` variables and use a hosting service like **
 - **MongoDB & Mongoose** (Database & ORM)
 - **JWT & Bcrypt** (Authentication & Security)
 - **Nodemailer** (Email Services)
+- **Jest/Supertest**(Testing)
 
 ## Contact
 
