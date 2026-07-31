@@ -20,15 +20,31 @@ const handleCastErrorDB = (err) => {
   return new AppError(msg, 400);
 };
 
-module.exports = (err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
+// DB error handle
+const handleValidationErrorDB = (err) => {
+  const errors = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid input data. ${errors.join(". ")}`;
+  return new AppError(message, 400);
+};
 
-  if (process.env.NODE_ENV === "development") {
-    sendErrorDevelopment(err, res);
-  } else if (process.env.NODE_ENV === "production") {
-    // let error = { ...err };
-    // if (error.name === "CastError") error = handleCastErrorDB(error);
-    sendErrorProduction(err, res);
+const handleDuplicateFieldsDB = (err) => {
+  const value = err.keyValue ? Object.values(err.keyValue)[0] : "field";
+  const message = `Duplicate field value: ${value}. Please use another value!`;
+  return new AppError(message, 400);
+};
+
+module.exports = (err, req, res, next) => {
+  let error = { ...err, message: err.message, name: err.name };
+
+  if (error.name === "ValidationError") error = handleValidationErrorDB(error);
+  if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+
+  error.statusCode = error.statusCode || 500;
+  error.status = error.status || "error";
+
+  if (process.env.NODE_ENV === "production") {
+    sendErrorProduction(error, res);
+  } else {
+    sendErrorDevelopment(error, res);
   }
 };

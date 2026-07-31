@@ -18,7 +18,7 @@ const createSendToken = (user, statusCode, res) => {
 
   const cookieOptions = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     secure: true,
     httpOnly: true,
@@ -46,6 +46,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm,
     role,
   });
+
+  newUser.password = undefined;
 
   // create a jwt token & send
   createSendToken(newUser, 201, res);
@@ -109,14 +111,17 @@ exports.protect = catchAsync(async (req, res, next) => {
   // promisify :- callback-based methods to promise-based
   const decode = await promisify(jwt.verify)(
     token,
-    process.env.JWT_SECRET
+    process.env.JWT_SECRET,
   ).catch((err) => next(new AppError(err.message, 401)));
 
   // Check if user exits
   const currentUser = await User.findById(decode.id);
   if (!currentUser)
     return next(
-      new AppError("The user belonging to this token does no longer exits", 401)
+      new AppError(
+        "The user belonging to this token does no longer exits",
+        401,
+      ),
     );
 
   // Check user change password after the token issued
@@ -131,7 +136,7 @@ exports.restrictTo = (...roles) => {
   return async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError("You dont have permission to perform this action", 403)
+        new AppError("You dont have permission to perform this action", 403),
       );
     }
     next();
@@ -157,7 +162,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   //Send it to user email
   const resetURL = `${req.protocol}://${req.get(
-    "host"
+    "host",
   )}/api/v1/users/reset-password/${resetToken}`;
 
   const message = `Forgot Your Password? Click on url to reset your password ${resetURL} .\n\n If you didnt forgat your password, please ignore this `;
@@ -180,7 +185,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     console.log(error);
 
     return next(
-      new AppError("There was an error ending to email. Try again later!", 500)
+      new AppError("There was an error ending to email. Try again later!", 500),
     );
   }
 });
