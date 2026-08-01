@@ -11,10 +11,25 @@ This is a **RESTful API** for a Tour Booking application, allowing users to brow
 - **Geolocation:** Get distances to tours from a given location.
 - **Email Notifications:** Automated emails for booking confirmation and password resets.
 
-## API Documentation
+## Technologies Used
 
-For a complete list of available endpoints and request examples, visit the **Postman API Documentation:**  
-👉 [API Documentation](https://documenter.getpostman.com/view/37294382/2sAYkKHHhd)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![Razorpay](https://img.shields.io/badge/Razorpay-02042B?style=for-the-badge&logo=razorpay&logoColor=white)
+![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+
+- **Node.js & Express** (Backend Framework)
+- **MongoDB & Mongoose** (Database & ORM)
+- **JWT & Bcrypt** (Authentication & Security)
+- **Nodemailer** (Email Services)
+- **Jest/Supertest**(Testing)
+
+## Live Demo
+
+- **API URL:** https://natours-api-906g.onrender.com/api/v1/tours
+- **Interactive API docs:** https://natours-api-906g.onrender.com/api-docs
 
 ## User Authentication Flow
 
@@ -294,23 +309,11 @@ Tests use `mongodb-memory-server` for an isolated in-memory database and Superte
 
 ## Deployment
 
-To deploy the API, set up the `.env` variables and use a hosting service like **Vercel, Render, or AWS**.
-
-## Technologies Used
-
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
-
-- **Node.js & Express** (Backend Framework)
-- **MongoDB & Mongoose** (Database & ORM)
-- **JWT & Bcrypt** (Authentication & Security)
-- **Nodemailer** (Email Services)
-- **Jest/Supertest**(Testing)
+Deployed on **Render** (free tier) with **MongoDB Atlas** as the hosted database. CI runs the full test suite via GitHub Actions on every push to `main`; deployment is triggered automatically on a successful merge to `main`.
 
 ## Contact
 
-For any inquiries, reach out via email: **mahajanyogesh443@gmail.com**
+For any inquiries, reach out via email: **mahajanyogeshwork@gmail.com**
 
 ---
 
