@@ -17,6 +17,10 @@ const options = {
         url: "http://localhost:3000/api/v1",
         description: "Local development server",
       },
+      {
+        url: "https://natours-api-906g.onrender.com/api/v1",
+        description: "Production",
+      },
     ],
     components: {
       securitySchemes: {
