@@ -290,6 +290,8 @@ npm test
 
 Tests use `mongodb-memory-server` for an isolated in-memory database and Supertest for HTTP integration testing.
 
+[![Run Tests](https://github.com/YogeshMahajanGit/Natours-API/actions/workflows/test.yaml/badge.svg)](https://github.com/YogeshMahajanGit/Natours-API/actions/workflows/test.yaml)
+
 ## Deployment
 
 To deploy the API, set up the `.env` variables and use a hosting service like **Vercel, Render, or AWS**.
