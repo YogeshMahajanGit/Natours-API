@@ -61,6 +61,14 @@ app.use(express.static(`${__dirname}/public`));
 // Swagger doc
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// cors
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  }),
+);
+
 // Routes
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
