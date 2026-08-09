@@ -7,6 +7,7 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
+const cors = require("cors");
 
 const AppError = require("./utils/appError.js");
 const globelErrorHandler = require("./utils/errors.js");
@@ -21,6 +22,14 @@ const app = express();
 
 // Security http headers
 app.use(helmet());
+
+// cors
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  }),
+);
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -60,14 +69,6 @@ app.use(express.static(`${__dirname}/public`));
 
 // Swagger doc
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-// cors
-app.use(
-  cors({
-    origin: ["http://localhost:5173"],
-    credentials: true,
-  }),
-);
 
 // Routes
 app.use("/api/v1/tours", tourRouter);
