@@ -38,9 +38,10 @@ if (process.env.NODE_ENV === "development") {
 // Limit request from same API
 const limiter = rateLimit({
   max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many request with this IP, Please try again in hour!",
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  message: "Too many requests from this IP, please try again in 10 minutes!",
 });
+
 app.use("/api", limiter);
 
 // Body parser

@@ -72,24 +72,22 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
-  const { passwordCurrent, passwordConfirm } = req.body;
+  const { passwordCurrent, password, passwordConfirm } = req.body;
 
-  // Get the user
+  // Get user
   const user = await User.findById(req.user.id).select("+password");
-
   if (!user) return next(new AppError("User not found!"));
 
-  // check prev password
+  // Check passowrd
   if (!(await user.correctPassword(passwordCurrent, user.password))) {
     return next(new AppError("Incorrect password", 401));
   }
 
-  // update new passwoed
-  user.password = passwordCurrent;
+  // Update password
+  user.password = password;
   user.passwordConfirm = passwordConfirm;
   await user.save();
 
-  // Log user with JWt
   createSendToken(user, 200, res);
 });
 
