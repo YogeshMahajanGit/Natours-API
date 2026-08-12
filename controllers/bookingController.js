@@ -99,6 +99,44 @@ exports.verifyPaymentAndBook = catchAsync(async (req, res, next) => {
   }
 });
 
+// 3) Webhook confirmation of payment (server-to-server)
+exports.razorpayWebhook = catchAsync(async (req, res, next) => {
+  const signature = req.headers["x-razorpay-signature"];
+  const body = req.body;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+    .update(body)
+    .digest("hex");
+
+  if (expectedSignature !== signature) {
+    return res
+      .status(400)
+      .json({ status: "fail", message: "Invalid signature" });
+  }
+
+  const event = JSON.parse(body);
+
+  if (event.event === "payment.captured") {
+    const payment = event.payload.payment.entity;
+    const { order_id, id: payment_id, notes } = payment;
+
+    const existing = await Booking.findOne({ razorpayPaymentId: payment_id });
+    if (!existing) {
+      await Booking.create({
+        tour: notes.tourId,
+        user: notes.userId,
+        price: payment.amount / 100,
+        razorpayOrderId: order_id,
+        razorpayPaymentId: payment_id,
+        paid: true,
+      });
+    }
+  }
+
+  res.status(200).json({ received: true });
+});
+
 exports.getBooking = factory.getOne(Booking);
 exports.getAllBookings = factory.getAll(Booking);
 exports.createBooking = factory.createOne(Booking);

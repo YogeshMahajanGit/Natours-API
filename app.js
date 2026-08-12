@@ -11,6 +11,7 @@ const cors = require("cors");
 
 const AppError = require("./utils/appError.js");
 const globelErrorHandler = require("./utils/errors.js");
+const bookingController = require("./controllers/bookingController.js");
 const tourRouter = require("./routes/tourRouter.js");
 const userRouter = require("./routes/userRouter.js");
 const bookingRouter = require("./routes/bookingRouter.js");
@@ -43,6 +44,13 @@ const limiter = rateLimit({
 });
 
 app.use("/api", limiter);
+
+// Razorpay signs
+app.post(
+  "/api/v1/webhook-razorpay",
+  express.raw({ type: "application/json" }),
+  bookingController.razorpayWebhook,
+);
 
 // Body parser
 app.use(express.json({ limit: "10kb" }));
