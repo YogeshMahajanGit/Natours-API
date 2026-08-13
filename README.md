@@ -1,6 +1,13 @@
-# Tour Booking API </>
+**Natours** — A full-stack tour booking platform built with Node.js, Express, and MongoDB. Features JWT authentication with role-based access control, geospatial tour search, and an integrated Razorpay payment flow with signature verification and webhook confirmation. Backed by a Jest/Supertest test suite, documented with Swagger/OpenAPI, and automated via GitHub Actions CI. Paired with a React frontend for browsing, booking, and managing tours.
 
-This is a **RESTful API** for a Tour Booking application, allowing users to browse tours, book trips, leave reviews, and manage their accounts. The API is built using **Node.js** and **Express**, with MongoDB as the database.
+<img width="1890" height="897" alt="natours home page" src="https://github.com/user-attachments/assets/665054cc-1979-4bba-a2f8-0286f2f53f90" />
+
+## Live Demo
+
+- **Live Demo** https://natours-frontend-gold.vercel.app
+- **API URL:** https://natours-api-906g.onrender.com/api/v1/tours
+- **Interactive API docs:** https://natours-api-906g.onrender.com/api-docs
+  
 
 ## Features
 
@@ -26,10 +33,6 @@ This is a **RESTful API** for a Tour Booking application, allowing users to brow
 - **Nodemailer** (Email Services)
 - **Jest/Supertest**(Testing)
 
-## Live Demo
-
-- **API URL:** https://natours-api-906g.onrender.com/api/v1/tours
-- **Interactive API docs:** https://natours-api-906g.onrender.com/api-docs
 
 ## User Authentication Flow
 
