@@ -79,6 +79,20 @@ app.use(express.static(`${__dirname}/public`));
 // Swagger doc
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Monitoring route
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "online",
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
+});
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "online",
+  });
+});
+
 // Routes
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
